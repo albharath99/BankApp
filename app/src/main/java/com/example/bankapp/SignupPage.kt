@@ -12,8 +12,8 @@ class SignupPage : AppCompatActivity() {
     private lateinit var mobilenumber: EditText
     private lateinit var age: EditText
     private lateinit var submit: Button
-    private lateinit var accountNumber: TextView
-
+    private lateinit var cardNumber: TextView
+    private lateinit var db: LocalDataBaseHelper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signup_page)
@@ -21,18 +21,18 @@ class SignupPage : AppCompatActivity() {
         name = findViewById(R.id.name)
         mobilenumber = findViewById(R.id.mobilenumber)
         age = findViewById(R.id.age)
-        accountNumber = findViewById(R.id.accountNumber)
+        cardNumber = findViewById(R.id.cardNumber)
         submit = findViewById(R.id.submit)
+        db = LocalDataBaseHelper(applicationContext)
 
         submit.setOnClickListener{
-            accountNumber.text = "${accountNumber.text} ${getNewAccountNumberFromDatabase().toString()}"
-            accountNumber.visibility = TextView.VISIBLE
+            val cardNumber = getNewCardNumberFromDatabase()
+            this.cardNumber.text = "${this.cardNumber.text} $cardNumber"
+            this.cardNumber.visibility = TextView.VISIBLE
         }
     }
 
-    private fun getNewAccountNumberFromDatabase(): Int {
-        //send Data to DB and get account number from DB
-        var x = (1..100).random()
-        return x
+    private fun getNewCardNumberFromDatabase(): String {
+        return db.insertNewUser(name.text.toString(), mobilenumber.text.toString().toInt(), age.text.toString().toInt())
     }
 }
