@@ -1,5 +1,6 @@
 package com.example.bankapp
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -10,13 +11,13 @@ import kotlin.random.Random
 class LocalDataBaseHelper(context: Context) {
     private var db: SQLiteDatabase
     private var mContext: Context
-    private final val TAG = javaClass.simpleName
+    private val TAG = javaClass.simpleName
     private var CREATE_TABLE = "CREATE TABLE IF NOT EXISTS USER_TABLE" +
             "( ID INTEGER PRIMARY KEY AUTOINCREMENT," +
             " NAME VARCHAR," +
             " MOBILE_NUMBER INTEGER," +
             " AGE INTEGER, " +
-            "BALANCE INTEGER DEFAULT 0, " +
+            "BALANCE INTEGER DEFAULT 15, " +
             "CARD_NUMBER VARCHAR )"
 
     init {
@@ -67,5 +68,41 @@ class LocalDataBaseHelper(context: Context) {
             return false
         }
 
+    }
+
+    @SuppressLint("Range")
+    fun getBalance(cardNumber: Int): Int{
+        var alreadyOpen = false
+        if(!db.isOpen) {
+            db = mContext.openOrCreateDatabase("myDb", Context.MODE_PRIVATE, null)
+        } else {
+            alreadyOpen = true
+        }
+        val GET_MONEY = "Select * from USER_Table where card_number = $cardNumber"
+        val cursor = db.rawQuery(GET_MONEY, null)
+        cursor.moveToFirst()
+        val balance = cursor.getInt(cursor.getColumnIndex("BALANCE"))
+        if(!alreadyOpen) {
+            db.close()
+        }
+        return balance
+    }
+
+    fun topUpMoney(cardNumber: Int, amount: Int): Boolean {
+        var done = false
+        db = mContext.openOrCreateDatabase("myDb", Context.MODE_PRIVATE, null)
+        if(db.isOpen) {
+            var balance = amount + getBalance(cardNumber)
+            val values = ContentValues()
+            values.put("balance", balance)
+            //db.update("User_table",values,"card_number = ?", arrayOf(cardNumber.toString()))
+            //val cursor = db.rawQuery("update User_table set balance = $balance where card_number = $cardNumber", null)
+            db.execSQL("update User_table set balance = $balance where card_number = $cardNumber")
+            //cursor.close()
+
+            db.close()
+        }
+
+        return done
     }
 }
