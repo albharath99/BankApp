@@ -58,7 +58,7 @@ class LocalDataBaseHelper(context: Context) {
     fun loginUser(cardNumber: Int): Boolean {
         db = mContext.openOrCreateDatabase("myDb", Context.MODE_PRIVATE, null)
         val cursor = db.rawQuery("Select * from User_table where card_number = $cardNumber", null)
-        Log.d(TAG,"Login User >>")
+        Log.d(TAG,"Login User >>. Cursor count: ${cursor.count}")
         if(cursor.count != 0)
         {
             db.close()
@@ -102,7 +102,26 @@ class LocalDataBaseHelper(context: Context) {
 
             db.close()
         }
+        return done
+    }
 
+    private fun updateUserBalance(cardNumber: Int, amount: Int) {
+        db.execSQL("update user_table set balance = $amount where card_number = $cardNumber")
+    }
+
+    fun transferMoney(sender: Int, receiver: Int, amount: Int): Boolean {
+        var done = false
+        db = mContext.openOrCreateDatabase("myDb", Context.MODE_PRIVATE, null)
+        var senderBalance = getBalance(sender)
+        var receiverBalance = getBalance(receiver)
+        if(senderBalance > amount) {
+            senderBalance -= amount
+            receiverBalance += amount
+            updateUserBalance(sender, senderBalance)
+            updateUserBalance(receiver, receiverBalance)
+            done = true
+        }
+        db.close()
         return done
     }
 }
