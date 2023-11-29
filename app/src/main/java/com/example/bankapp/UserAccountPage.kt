@@ -54,5 +54,30 @@ class UserAccountPage : AppCompatActivity() {
                 balanceTv.text = db.getBalance(cardNumber).toString()
             }
         }
+
+        transferBt.setOnClickListener {
+            if(clickTv.visibility == TextView.INVISIBLE) {
+                Log.d(TAG,"CLick invisible")
+                amountEt.text.clear()
+                amountEt.visibility = EditText.VISIBLE
+                enterCardNumEt.text.clear()
+                enterCardNumEt.visibility = EditText.VISIBLE
+                clickTv.text = "Press transfer again after entering amount and recepient card number"
+                clickTv.visibility = TextView.VISIBLE
+            } else {
+                Log.d(TAG,"CLick visible")
+                val amount = amountEt.text.toString().toInt()
+                val targetCardNumber = enterCardNumEt.text.toString().toInt()
+                if(db.transferMoney(cardNumber, targetCardNumber, amount)){
+                    Toast.makeText(applicationContext,"Transfer succesful", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext,"Transfer unsuccesful", Toast.LENGTH_SHORT).show()
+                }
+                amountEt.visibility = EditText.INVISIBLE
+                clickTv.visibility = TextView.INVISIBLE
+                enterCardNumEt.visibility = EditText.INVISIBLE
+                balanceTv.text = db.getBalance(cardNumber).toString()
+            }
+        }
     }
 }
